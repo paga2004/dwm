@@ -14,6 +14,13 @@ static const char *colors[][3]      = {
         [SchemeSel]  = { "#93a1a1", "#002b36",  "#586e75" },
 };
 
+static const char *const autostart[] = {
+	"remaps", NULL,
+	"unclutter", NULL,
+	"dwmblocks", NULL,
+	NULL /* terminate */
+};
+
 /* tagging */
 static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
