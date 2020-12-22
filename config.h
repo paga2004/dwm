@@ -15,10 +15,10 @@ static const char *colors[][3]      = {
 };
 
 static const char *const autostart[] = {
-	"remaps", NULL,
-	"unclutter", NULL,
-	"dwmblocks", NULL,
-	NULL /* terminate */
+        "remaps", NULL,
+        "unclutter", NULL,
+        "dwmblocks", NULL,
+        NULL /* terminate */
 };
 
 /* tagging */
@@ -47,7 +47,7 @@ static const Layout layouts[] = {
         { "><>",      NULL },    /* no layout function means floating behavior */
         { "[M]",      monocle },
         { "[]=",      tile },  
-	    { "###",      grid },
+        { "###",      grid },
         { "[@]",      spiral },
 };
 
@@ -137,6 +137,7 @@ static Key keys[] = {
       TAGKEYS(                      XK_8,                              7)
       TAGKEYS(                      XK_9,                              8)
 
+    { MODKEY,                       XK_grave,          spawn,          SHCMD("dmenuemoji") },
     { MODKEY,                       XK_Return,         spawn,          {.v = termcmd } },
     { MODKEY|ShiftMask,             XK_Return,         NULL,           {0} },
     { MODKEY,                       XK_space,          zoom,           {0} },
@@ -146,14 +147,12 @@ static Key keys[] = {
     { MODKEY|ShiftMask,             XK_comma,          NULL,           {0} },
     { MODKEY,                       XK_period,         NULL,           {0} },
     { MODKEY|ShiftMask,             XK_period,         NULL,           {0} },
-
     { MODKEY,                       XK_Left,           setmfact,       {.f = -0.01 } },
     { MODKEY,                       XK_Right,          setmfact,       {.f = +0.01 } },
     { MODKEY,                       XK_Page_Up,        NULL,           {0} },
     { MODKEY|ShiftMask,             XK_Page_Up,        NULL,           {0} },
     { MODKEY,                       XK_Page_Down,      NULL,           {0} },
     { MODKEY|ShiftMask,             XK_Page_Down,      NULL,           {0} },
-
     { MODKEY,                       XK_Insert,         NULL,           {0} },
     { MODKEY|ShiftMask,             XK_Insert,         NULL,           {0} },
     { 0,                            XK_Print,          spawn,          SHCMD("") },
