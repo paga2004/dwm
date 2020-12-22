@@ -875,7 +875,7 @@ focusmon(const Arg *arg)
 void
 focusstack(const Arg *arg)
 {
-    if(selmon->sel->isfullscreen) return;
+    if(selmon && selmon->sel && selmon->sel->isfullscreen) return;
 	int i = stackpos(arg);
 	Client *c, *p;
 
@@ -1284,7 +1284,7 @@ propertynotify(XEvent *e)
 
 void
 pushstack(const Arg *arg) {
-    if(selmon->sel->isfullscreen) return;
+    if(selmon && selmon->sel && selmon->sel->isfullscreen) return;
 	int i = stackpos(arg);
 	Client *sel = selmon->sel, *c, *p;
 
