@@ -62,7 +62,7 @@ static const char *termcmd[]  = { "st -e /bin/fish", NULL };
 static Key keys[] = {
     /* modifier                     key                function        argument */
     { MODKEY,                       XK_q,              killclient,     {0} },
-    { MODKEY|ShiftMask,             XK_q,              NULL,           {0} },
+    { MODKEY|ShiftMask,             XK_q,              spawn,          SHCMD("dmenusysact") },
     { MODKEY,                       XK_w,              NULL,           {0} },
     { MODKEY|ShiftMask,             XK_w,              NULL,           {0} },
     { MODKEY,                       XK_f,              setlayout,      {.v = &layouts[1]} },
@@ -73,8 +73,8 @@ static Key keys[] = {
     { MODKEY|ShiftMask,             XK_g,              NULL,           {0} },
     { MODKEY,                       XK_j,              focusmon,       {.i = +1 } },
     { MODKEY|ShiftMask,             XK_j,              tagmon,         {.i = +1 } },
-    /* { MODKEY,                       XK_l,              focusstack,     {.i = INC(-1) } }, */
-    /* { MODKEY|ShiftMask,             XK_l,              pushstack,      {.i = INC(-1) } }, */
+    { MODKEY,                       XK_l,              focusstack,     {.i = INC(-1) } },
+    { MODKEY|ShiftMask,             XK_l,              pushstack,      {.i = INC(-1) } },
     { MODKEY,                       XK_u,              NULL,           {0} },
     { MODKEY|ShiftMask,             XK_u,              NULL,           {0} },
     { MODKEY,                       XK_y,              NULL,           {0} },
@@ -90,8 +90,8 @@ static Key keys[] = {
     { MODKEY|ShiftMask,             XK_t,              NULL,           {0} },
     { MODKEY,                       XK_d,              spawn,          {.v = dmenucmd } },
     { MODKEY|ShiftMask,             XK_d,              NULL,           {0} },
-    /* { MODKEY,                       XK_h,              focusstack,     {.i = INC(+1) } }, */ 
-    /* { MODKEY|ShiftMask,             XK_h,              pushstack,      {.i = INC(+1) } }, */
+    { MODKEY,                       XK_h,              focusstack,     {.i = INC(+1) } }, 
+    { MODKEY|ShiftMask,             XK_h,              pushstack,      {.i = INC(+1) } },
     { MODKEY,                       XK_n,              NULL,           {0} },
     { MODKEY|ShiftMask,             XK_n,              NULL,           {0} },
     { MODKEY,                       XK_e,              NULL,           {0} },
@@ -153,6 +153,7 @@ static Key keys[] = {
     { MODKEY,                       XK_Print,          spawn,          SHCMD("dmenurecord") },
     { MODKEY|ShiftMask,             XK_Print,          spawn,          SHCMD("dmenurecord kill") },
     { MODKEY,                       XK_Delete,         spawn,          SHCMD("dmenurecord kill") },
+    { MODKEY,                       XK_BackSpace,      spawn,          SHCMD("dmenusysact") },
     { MODKEY,                       XK_Scroll_Lock,    spawn,          SHCMD("") },
 
     { MODKEY,                       XK_F1,             NULL,           {0} },
