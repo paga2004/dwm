@@ -101,6 +101,9 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, NULL };
 static const char *termcmd[]  = { "st",  "-e", "/bin/fish", NULL };
 
+static const char scratchpadname[] = "scratchpad";
+static const char *scratchpadcmd[] = { "st", "-t", scratchpadname, "-g", "120x34", "-e", "/bin/fish", NULL };
+
 #include <X11/XF86keysym.h>
 
 static Key keys[] = {
@@ -175,7 +178,7 @@ static Key keys[] = {
 
     { MODKEY,                       XK_grave,          spawn,                   SHCMD("dmenuemoji") },
     { MODKEY,                       XK_Return,         spawn,                   {.v = termcmd } },
-    { MODKEY|ShiftMask,             XK_Return,         NULL,                    {0} },
+    { MODKEY|ShiftMask,             XK_Return,         togglescratch,           {.v = scratchpadcmd } },
     { MODKEY,                       XK_space,          zoom,                    {0} },
     { MODKEY|ShiftMask,             XK_space,          togglefloating,          {0} },
     { MODKEY,                       XK_Tab,            view,                    {0} },
@@ -196,7 +199,7 @@ static Key keys[] = {
     { MODKEY,                       XK_Print,          spawn,                   SHCMD("dmenurecord") },
     { MODKEY|ShiftMask,             XK_Print,          spawn,                   SHCMD("dmenurecord kill") },
     { MODKEY,                       XK_Delete,         spawn,                   SHCMD("dmenurecord kill") },
-    { MODKEY,                       XK_BackSpace,      spawn,                   SHCMD("dmenusysact") },
+    { MODKEY,                       XK_BackSpace,      spawn,                   SHCMD("sysact") },
     { MODKEY,                       XK_Scroll_Lock,    spawn,                   SHCMD("") },
 
     { MODKEY,                       XK_F1,             NULL,                    {0} },
