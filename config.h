@@ -64,7 +64,7 @@ static const Rule rules[] = {
          */
         /* class      instance    title       tags mask     isfloating   monitor */
         { "Gimp",     NULL,       NULL,       0,            1,           -1 },
-        { "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
+        /* { "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 }, */
 };
 
 /* layout(s) */
@@ -94,11 +94,14 @@ static const Layout layouts[] = {
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+#define TERMCMD(cmd) SHCMD("$TERMINAL -e " cmd)
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, NULL };
 static const char *termcmd[]  = { "st",  "-e", "/bin/fish", NULL };
+
+#include <X11/XF86keysym.h>
 
 static Key keys[] = {
     /* modifier                     key                function                 argument */
@@ -155,7 +158,7 @@ static Key keys[] = {
     { MODKEY,                       XK_k,              focusmon,                {.i = -1 } },
     { MODKEY|ShiftMask,             XK_k,              tagmon,                  {.i = -1 } },
     { MODKEY,                       XK_m,              setlayout,               {.v = &layouts[2]} },
-    { MODKEY|ShiftMask,             XK_m,              NULL,                    {0} },
+    { MODKEY|ShiftMask,             XK_m,              spawn,                   SHCMD("volume toggle") },
 
     { MODKEY,                       XK_0,              showgrid,                {0} },
     { MODKEY|ShiftMask,             XK_0,              tag,                     {.ui = ~0 } },
@@ -188,7 +191,7 @@ static Key keys[] = {
     { MODKEY|ShiftMask,             XK_Page_Down,      NULL,                    {0} },
     { MODKEY,                       XK_Insert,         NULL,                    {0} },
     { MODKEY|ShiftMask,             XK_Insert,         NULL,                    {0} },
-    { 0,                            XK_Print,          spawn,                   SHCMD("") },
+    { 0,                            XK_Print,          spawn,                   SHCMD("maim screenshot-$(date '+%y%m%d-%H%M-%S').png") },
     { ShiftMask,                    XK_Print,          spawn,                   SHCMD("") },
     { MODKEY,                       XK_Print,          spawn,                   SHCMD("dmenurecord") },
     { MODKEY|ShiftMask,             XK_Print,          spawn,                   SHCMD("dmenurecord kill") },
@@ -198,16 +201,45 @@ static Key keys[] = {
 
     { MODKEY,                       XK_F1,             NULL,                    {0} },
     { MODKEY,                       XK_F2,             NULL,                    {0} },
-    { MODKEY,                       XK_F3,             NULL,                    {0} },
+    { MODKEY,                       XK_F3,             spawn,                   TERMCMD("alsamixer; sigdwmblocks 9") },
     { MODKEY,                       XK_F4,             NULL,                    {0} },
     { MODKEY,                       XK_F5,             NULL,                    {0} },
     { MODKEY,                       XK_F6,             NULL,                    {0} },
     { MODKEY,                       XK_F7,             NULL,                    {0} },
-    { MODKEY,                       XK_F8,             NULL,                    {0} },
-    { MODKEY,                       XK_F9,             NULL,                    {0} },
-    { MODKEY,                       XK_F10,            NULL,                    {0} },
-    { MODKEY,                       XK_F11,            NULL,                    {0} },
-    { MODKEY,                       XK_F12,            NULL,                    {0} },
+    { MODKEY,                       XK_F8,             spawn,                   SHCMD("dmenumount") },
+    { MODKEY,                       XK_F9,            spawn,                    SHCMD("dmenuumount") },
+    { MODKEY,                       XK_F10,            spawn,                   SHCMD("webcam") },
+    { MODKEY,                       XK_F11,             spawn,                  SHCMD("displayselect") },
+    { MODKEY,                       XK_F12,            spawn,                   SHCMD("freeze") },
+
+    { 0, XF86XK_AudioMute,          spawn,        SHCMD("volume mute") },
+    { 0, XF86XK_AudioRaiseVolume,   spawn,        SHCMD("volume up 5") },
+    { 0, XF86XK_AudioLowerVolume,   spawn,        SHCMD("volume down 5") },
+    { 0, XF86XK_AudioPrev,          spawn,        SHCMD("mpc prev") },
+    { 0, XF86XK_AudioNext,          spawn,        SHCMD("mpc next") },
+    { 0, XF86XK_AudioPause,         spawn,        SHCMD("mpc pause") },
+    { 0, XF86XK_AudioPlay,          spawn,        SHCMD("mpc play") },
+    { 0, XF86XK_AudioStop,          spawn,        SHCMD("mpc stop") },
+    { 0, XF86XK_AudioRewind,        spawn,        SHCMD("mpc seek -10") },
+    { 0, XF86XK_AudioForward,       spawn,        SHCMD("mpc seek +10") },
+    { 0, XF86XK_AudioMedia,         NULL,         {0} },
+    { 0, XF86XK_AudioMicMute,       NULL,         {0} },
+    { 0, XF86XK_PowerOff,           spawn,        SHCMD("dmenusysact") },
+    { 0, XF86XK_Calculator,         spawn,        TERMCMD("bc -l") },
+    { 0, XF86XK_Sleep,              NULL,         {0} },
+    { 0, XF86XK_WWW,                spawn,        SHCMD("$BROWSER") },
+    { 0, XF86XK_DOS,                spawn,        SHCMD("$TERMINAL") },
+    { 0, XF86XK_ScreenSaver,        NULL,         {0} },
+    { 0, XF86XK_TaskPane,           spawn,        TERMCMD("htop") },
+    { 0, XF86XK_Mail,               NULL,         {0} },
+    { 0, XF86XK_MyComputer,         NULL,         {0} },
+    /* { 0, XF86XK_Battery,         spawn,        SHCMD("") }, */
+    { 0, XF86XK_Launch1,            NULL,         {0} },
+    { 0, XF86XK_TouchpadToggle,     NULL,         {0} },
+    { 0, XF86XK_TouchpadOff,        NULL,         {0} },
+    { 0, XF86XK_TouchpadOn,         NULL,         {0} },
+    { 0, XF86XK_MonBrightnessUp,    NULL,         {0} },
+    { 0, XF86XK_MonBrightnessDown,  NULL,         {0} },
 };
 
 /* button definitions */
@@ -220,6 +252,8 @@ static Button buttons[] = {
         { ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1} },
         { ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2} },
         { ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3} },
+        { ClkStatusText,        0,              Button4,        sigdwmblocks,   {.i = 4} },
+        { ClkStatusText,        0,              Button5,        sigdwmblocks,   {.i = 5} },
         { ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
         { ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
         { ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
