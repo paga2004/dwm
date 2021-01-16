@@ -504,21 +504,21 @@ buttonpress(XEvent *e)
 		focus(NULL);
 	}
 	if (ev->window == selmon->barwin) {
+        i = x = 0;
         for (c = m->clients; c; c = c->next)
 			occ |= c->tags == 255 ? 0 : c->tags;
         if (ev->x < ble) {
-            if (ev->x < ble - blw) {
-                    i = -1, x = -ev->x;
-                    do {
-                        /* do not reserve space for vacant tags */
-                        if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
-			                continue;
-                        x += TEXTW(tags[++i]);
-                    } while (x <= 0);
-                   click = ClkTagBar;
-                   arg.ui = 1 << i;
+            do {
+                /* do not reserve space for vacant tags */
+                if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
+                    continue;
+                x += TEXTW(tags[i]);
+            } while (ev->x >= x && ++i < LENGTH(tags));
+            if (i < LENGTH(tags)) {
+               click = ClkTagBar;
+               arg.ui = 1 << i;
            } else
-                                click = ClkLtSymbol;
+                click = ClkLtSymbol;
         } else if (ev->x < selmon->ww - wstext)
                         click = ClkWinTitle;
         else if ((x = selmon->ww - lrpad / 2 - ev->x) > 0 && (x -= wstext - lrpad) <= 0) {
