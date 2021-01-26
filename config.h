@@ -9,38 +9,9 @@ static const char *fonts[] = {
         "monospace:size=10",
     "NotoColorEmoji:size=10"
 };
-static const char col_gray1[]       = "#222222";
-static const char col_gray2[]       = "#444444";
-static const char col_gray3[]       = "#bbbbbb";
-static const char col_gray4[]       = "#eeeeee";
-static const char col_cyan[]        = "#005577";
-static const char col1[]            = "#ffffff";
-static const char col2[]            = "#ffffff";
-static const char col3[]            = "#ffffff";
-static const char col4[]            = "#ffffff";
-static const char col5[]            = "#ffffff";
-static const char col6[]            = "#ffffff";
-static const char col7[]            = "#ffffff";
-static const char col8[]            = "#ffffff";
-static const char col9[]            = "#ffffff";
-static const char col10[]           = "#ffffff";
-static const char col11[]           = "#ffffff";
-static const char col12[]           = "#ffffff";
 static const char *colors[][3]      = {
         /*               fg         bg         border   */
         [SchemeNorm] = { "#586e75", "#002b36", "#073642" },
-        [SchemeCol1]  = { col1,      col_gray1, col_gray2 },
-        [SchemeCol2]  = { col2,      col_gray1, col_gray2 },
-        [SchemeCol3]  = { col3,      col_gray1, col_gray2 },
-        [SchemeCol4]  = { col4,      col_gray1, col_gray2 },
-        [SchemeCol5]  = { col5,      col_gray1, col_gray2 },
-        [SchemeCol6]  = { col6,      col_gray1, col_gray2 },
-        [SchemeCol7]  = { col7,      col_gray1, col_gray2 },
-        [SchemeCol8]  = { col8,      col_gray1, col_gray2 },
-        [SchemeCol9]  = { col8,      col_gray1, col_gray2 },
-        [SchemeCol10] = { col10,     col_gray1, col_gray2 },
-        [SchemeCol11] = { col11,     col_gray1, col_gray2 },
-        [SchemeCol12] = { col12,     col_gray1, col_gray2 },
         [SchemeSel]  = { "#93a1a1", "#002b36",  "#586e75" },
 };
 
@@ -109,7 +80,7 @@ static const char *scratchpadcmd[] = { "st", "-t", scratchpadname, "-g", "120x34
 static Key keys[] = {
     /* modifier                     key                function                 argument */
     { MODKEY,                       XK_q,              killclient,              {0} },
-    { MODKEY|ShiftMask,             XK_q,              spawn,                   SHCMD("dmenusysact") },
+    { MODKEY|ShiftMask,             XK_q,              spawn,                   SHCMD("xkill") },
     { MODKEY,                       XK_w,              spawn,                   SHCMD("$BROWSER") },
     { MODKEY|ShiftMask,             XK_w,              NULL,                    {0} },
     { MODKEY,                       XK_f,              togglefullscreen,        {0} },
@@ -176,6 +147,8 @@ static Key keys[] = {
       TAGKEYS(                      XK_8,                                       7)
       TAGKEYS(                      XK_9,                                       8)
 
+    { MODKEY,                       XK_Escape,         spawn,                   SHCMD("sysact") },
+    { MODKEY|ShiftMask,             XK_Escape,         NULL,                    {0} },
     { MODKEY,                       XK_grave,          spawn,                   SHCMD("dmenuemoji") },
     { MODKEY,                       XK_Return,         spawn,                   {.v = termcmd } },
     { MODKEY|ShiftMask,             XK_Return,         togglescratch,           {.v = scratchpadcmd } },
