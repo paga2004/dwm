@@ -53,6 +53,7 @@ static const Layout layouts[] = {
         { "[]=",      tile },  
         { "###",      grid },
         { "[@]",      spiral },
+        { NULL,       NULL },
 };
 
 /* key definitions */
@@ -155,9 +156,9 @@ static Key keys[] = {
     { MODKEY,                       XK_space,          zoom,                    {0} },
     { MODKEY|ShiftMask,             XK_space,          togglefloating,          {0} },
     { MODKEY,                       XK_Tab,            view,                    {0} },
-    { MODKEY,                       XK_comma,          NULL,                    {0} },
+    { MODKEY,                       XK_comma,          cyclelayout,             {.i = -1 } },
     { MODKEY|ShiftMask,             XK_comma,          NULL,                    {0} },
-    { MODKEY,                       XK_period,         NULL,                    {0} },
+    { MODKEY,                       XK_period,         cyclelayout,             {.i = +1 } },
     { MODKEY|ShiftMask,             XK_period,         NULL,                    {0} },
     { MODKEY,                       XK_Left,           setmfact,                {.f = -0.01 } },
     { MODKEY,                       XK_Right,          setmfact,                {.f = +0.01 } },
