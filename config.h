@@ -6,7 +6,7 @@ static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 0;        /* 0 means bottom bar */
 static const char *fonts[] = {
-        "monospace:size=10",
+    "monospace:size=10",
     "NotoColorEmoji:size=10"
 };
 static const char *colors[][3]      = {
@@ -19,6 +19,7 @@ static const char *const autostart[] = {
         "remaps", NULL,
         "unclutter", NULL,
         "dwmblocks", NULL,
+        "wallpaper", NULL,
         NULL /* terminate */
 };
 
