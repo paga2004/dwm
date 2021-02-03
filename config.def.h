@@ -13,34 +13,12 @@ static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
 static const char col_cyan[]        = "#005577";
-static const char col1[]            = "#ffffff";
-static const char col2[]            = "#ffffff";
-static const char col3[]            = "#ffffff";
-static const char col4[]            = "#ffffff";
-static const char col5[]            = "#ffffff";
-static const char col6[]            = "#ffffff";
-static const char col7[]            = "#ffffff";
-static const char col8[]            = "#ffffff";
-static const char col9[]            = "#ffffff";
-static const char col10[]           = "#ffffff";
-static const char col11[]           = "#ffffff";
-static const char col12[]           = "#ffffff";
+static const char col_urgborder[]   = "#ff0000";
 static const char *colors[][3]      = {
-	/*               fg         bg         border   */
-	[SchemeNorm]  = { col_gray3, col_gray1, col_gray2 },
-	[SchemeCol1]  = { col1,      col_gray1, col_gray2 },
-	[SchemeCol2]  = { col2,      col_gray1, col_gray2 },
-	[SchemeCol3]  = { col3,      col_gray1, col_gray2 },
-	[SchemeCol4]  = { col4,      col_gray1, col_gray2 },
-	[SchemeCol5]  = { col5,      col_gray1, col_gray2 },
-	[SchemeCol6]  = { col6,      col_gray1, col_gray2 },
-	[SchemeCol7]  = { col7,      col_gray1, col_gray2 },
-	[SchemeCol8]  = { col8,      col_gray1, col_gray2 },
-	[SchemeCol9]  = { col8,      col_gray1, col_gray2 },
-	[SchemeCol10] = { col10,     col_gray1, col_gray2 },
-	[SchemeCol11] = { col11,     col_gray1, col_gray2 },
-	[SchemeCol12] = { col12,     col_gray1, col_gray2 },
-	[SchemeSel]   = { col_gray4, col_cyan,  col_cyan  },
+ 	/*               fg         bg         border   */
+ 	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
+ 	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan  },
+	[SchemeUrg]  = { col_gray4, col_cyan,  col_urgborder  },
 };
 
 static const char *const autostart[] = {

@@ -14,6 +14,7 @@ static const char *colors[][3]      = {
         /*               fg         bg         border   */
         [SchemeNorm] = { "#586e75", "#002b36", "#073642" },
         [SchemeSel]  = { "#93a1a1", "#002b36",  "#586e75" },
+	    [SchemeUrg]  = { "#93a1a1", "#002b36",  "#dc322f" },
 };
 
 static const char *const autostart[] = {
