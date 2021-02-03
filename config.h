@@ -2,6 +2,7 @@
 
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
+static const Gap default_gap        = {.isgap = 1, .realgap = 10, .gappx = 10};
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 0;        /* 0 means bottom bar */
@@ -45,8 +46,6 @@ static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] 
 static const int nmaster     = 1;    /* number of clients in master area */
 static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
 
-#include "grid.c"
-#include "fibonacci.c"
 static const Layout layouts[] = {
         /* symbol     arrange function */
         { "[\\]",       dwindle },  /* first entry is default */
@@ -150,7 +149,12 @@ static Key keys[] = {
       TAGKEYS(                                   XK_8,                                       7)
       TAGKEYS(                                   XK_9,                                       8)
 
+    { MODKEY,                                    XK_minus,          setgaps,                 {.i = -5 } },
+    { MODKEY,                                    XK_equal,          setgaps,                 {.i = +5 } },
+    { MODKEY|ShiftMask,                          XK_minus,          setgaps,                 {.i = GAP_RESET } },
+    { MODKEY|ShiftMask,                          XK_equal,          setgaps,                 {.i = GAP_TOGGLE} },
     { MODKEY,                                    XK_Escape,         spawn,                   SHCMD("sysact") },
+
     { MODKEY|ShiftMask,                          XK_Escape,         NULL,                    {0} },
     { MODKEY,                                    XK_grave,          spawn,                   SHCMD("dmenuemoji") },
     { MODKEY,                                    XK_Return,         spawn,                   {.v = termcmd } },

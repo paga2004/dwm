@@ -129,6 +129,12 @@ typedef struct {
 	void (*arrange)(Monitor *);
 } Layout;
 
+typedef struct {
+	int isgap;
+	int realgap;
+	int gappx;
+} Gap;
+
 typedef struct Pertag Pertag;
 struct Monitor {
 	char ltsymbol[16];
@@ -138,6 +144,7 @@ struct Monitor {
 	int by;               /* bar geometry */
 	int mx, my, mw, mh;   /* screen size */
 	int wx, wy, ww, wh;   /* window area  */
+	Gap *gap;
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
@@ -185,18 +192,22 @@ static void detachstack(Client *c);
 static Monitor *dirtomon(int dir);
 static void drawbar(Monitor *m);
 static void drawbars(void);
+static void dwindle(Monitor *);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
+static void fibonacci(Monitor *, int);
 static void focus(Client *c);
 static void focusin(XEvent *e);
 static void focusmon(const Arg *arg);
 static void focusstack(const Arg *arg);
+static void gap_copy(Gap *to, const Gap *from);
 static Atom getatomprop(Client *c, Atom prop);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
+static void grid(Monitor *);
 static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
@@ -223,6 +234,7 @@ static void sendmon(Client *c, Monitor *m);
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
+static void setgaps(const Arg *arg);
 static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
@@ -232,6 +244,7 @@ static void showhide(Client *c);
 static void sigchld(int unused);
 static void sigdwmblocks(const Arg *arg);
 static void spawn(const Arg *arg);
+static void spiral(Monitor *);
 static int stackpos(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
@@ -738,6 +751,8 @@ createmon(void)
 	m->nmaster = nmaster;
 	m->showbar = showbar;
 	m->topbar = topbar;
+	m->gap = malloc(sizeof(Gap));
+	gap_copy(m->gap, &default_gap);
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
@@ -910,6 +925,11 @@ drawbars(void)
 }
 
 void
+dwindle(Monitor *mon) {
+	fibonacci(mon, 1);
+}
+
+void
 enternotify(XEvent *e)
 {
 	Client *c, *sel;
@@ -937,6 +957,65 @@ expose(XEvent *e)
 
 	if (ev->count == 0 && (m = wintomon(ev->window)))
 		drawbar(m);
+}
+
+void
+fibonacci(Monitor *mon, int s) {
+	unsigned int i, n, nx, ny, nw, nh, gap;
+	Client *c;
+
+	for(n = 0, c = nexttiled(mon->clients); c; c = nexttiled(c->next), n++);
+	if (n == 0) return;
+    else if(n == 1) gap = 0;
+    else gap = mon->gap->gappx;
+    
+	
+	nx = mon->wx;
+	ny = 0;
+	nw = mon->ww - 2*gap;
+	nh = mon->wh - 2*gap;
+	
+	for(i = 0, c = nexttiled(mon->clients); c; c = nexttiled(c->next)) {
+		if((i % 2 && nh / 2 > 2 * c->bw)
+		   || (!(i % 2) && nw / 2 > 2 * c->bw)) {
+			if(i < n - 1) {
+				if(i % 2)
+					nh /= 2;
+				else
+					nw /= 2;
+				if((i % 4) == 2 && !s)
+					nx += nw;
+				else if((i % 4) == 3 && !s)
+					ny += nh;
+			}
+			if((i % 4) == 0) {
+				if(s)
+					ny += nh;
+				else
+					ny -= nh;
+			}
+			else if((i % 4) == 1)
+				nx += nw;
+			else if((i % 4) == 2)
+				ny += nh;
+			else if((i % 4) == 3) {
+				if(s)
+					nx += nw;
+				else
+					nx -= nw;
+			}
+			if(i == 0)
+			{
+				if(n != 1)
+					nw = mon->ww * mon->mfact;
+				ny = mon->wy;
+			}
+			else if(i == 1)
+				nw = mon->ww - nw - gap;
+			i++;
+		}
+		resize(c, nx + gap, ny + gap, nw - 2 * c->bw - gap, nh - 2 * c->bw - gap, False);
+	}
 }
 
 void
@@ -1111,6 +1190,34 @@ grabkeys(void)
 				for (j = 0; j < LENGTH(modifiers); j++)
 					XGrabKey(dpy, code, keys[i].mod | modifiers[j], root,
 						True, GrabModeAsync, GrabModeAsync);
+	}
+}
+
+void
+grid(Monitor *m) {
+	unsigned int i, n, cx, cy, cw, ch, aw, ah, cols, rows;
+	Client *c;
+
+	for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next))
+		n++;
+
+	/* grid dimensions */
+	for(cols = 0; cols <= n/2; cols++)
+		if(cols*cols >= n)
+			break;
+	rows = (cols && (cols - 1) * cols >= n) ? cols - 1 : cols;
+
+	/* window geoms (cell height/width) */
+	ch = m->wh / (rows ? rows : 1);
+	cw = m->ww / (cols ? cols : 1);
+	for(i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
+		cx = m->wx + (i / rows) * cw;
+		cy = m->wy + (i % rows) * ch;
+		/* adjust height/width of last row/column's windows */
+		ah = ((i + 1) % rows == 0) ? m->wh - ch * rows : 0;
+		aw = (i >= rows * (cols - 1)) ? m->ww - cw * cols : 0;
+		resize(c, cx, cy, cw - 2 * c->bw + aw, ch - 2 * c->bw + ah, False);
+		i++;
 	}
 }
 
@@ -1795,6 +1902,35 @@ setfullscreen(Client *c, int fullscreen)
 }
 
 void
+gap_copy(Gap *to, const Gap *from)
+{
+	to->isgap   = from->isgap;
+	to->realgap = from->realgap;
+	to->gappx   = from->gappx;
+}
+
+void
+setgaps(const Arg *arg)
+{
+	Gap *p = selmon->gap;
+	switch(arg->i)
+	{
+		case GAP_TOGGLE:
+			p->isgap = 1 - p->isgap;
+			break;
+		case GAP_RESET:
+			gap_copy(p, &default_gap);
+			break;
+		default:
+			p->realgap += arg->i;
+			p->isgap = 1;
+	}
+	p->realgap = MAX(p->realgap, 0);
+	p->gappx = p->realgap * p->isgap;
+	arrange(selmon);
+}
+
+void
 setlayout(const Arg *arg)
 {
 	if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt])
@@ -2001,6 +2137,11 @@ spawn(const Arg *arg)
 	}
 }
 
+void
+spiral(Monitor *mon) {
+	fibonacci(mon, 0);
+}
+
 int
 stackpos(const Arg *arg) {
 	int n, i;
@@ -2062,28 +2203,29 @@ tagmon(const Arg *arg)
 void
 tile(Monitor *m)
 {
-	unsigned int i, n, h, mw, my, ty;
+	unsigned int i, n, h, mw, my, ty, gap;
 	Client *c;
 
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	if (n == 0)
-		return;
-
+	if (n == 0) return;
+    else if(n == 1) gap = 0;
+    else gap = m->gap->gappx;
+    
 	if (n > m->nmaster)
 		mw = m->nmaster ? m->ww * m->mfact : 0;
 	else
-		mw = m->ww;
-	for (i = my = ty = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+		mw = m->ww - gap;
+	for (i = 0, my = ty = gap, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
 		if (i < m->nmaster) {
-			h = (m->wh - my) / (MIN(n, m->nmaster) - i);
-			resize(c, m->wx, m->wy + my, mw - (2*c->bw), h - (2*c->bw), 0);
-			if (my + HEIGHT(c) < m->wh)
-				my += HEIGHT(c);
+			h = (m->wh - my) / (MIN(n, m->nmaster) - i) - gap;
+			resize(c, m->wx + gap, m->wy + my, mw - (2*c->bw) - gap, h - (2*c->bw), 0);
+			if (my + HEIGHT(c) + gap < m->wh)
+				my += HEIGHT(c) + gap;
 		} else {
-			h = (m->wh - ty) / (n - i);
-			resize(c, m->wx + mw, m->wy + ty, m->ww - mw - (2*c->bw), h - (2*c->bw), 0);
-			if (ty + HEIGHT(c) < m->wh)
-				ty += HEIGHT(c);
+			h = (m->wh - ty) / (n - i) - gap;
+			resize(c, m->wx + mw + gap, m->wy + ty, m->ww - mw - (2*c->bw) - 2*gap, h - (2*c->bw), 0);
+			if (ty + HEIGHT(c) + gap < m->wh)
+				ty += HEIGHT(c) + gap;
 		}
 }
 
