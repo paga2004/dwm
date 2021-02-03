@@ -562,6 +562,14 @@ cleanup(void)
 	Monitor *m;
 	size_t i;
 
+	/* kill child processes */
+	for (i = 0; i < autostart_len; i++) {
+		if (0 < autostart_pids[i]) {
+			kill(autostart_pids[i], SIGTERM);
+			waitpid(autostart_pids[i], NULL, 0);
+		}
+	}
+
 	view(&a);
 	selmon->lt[selmon->sellt] = &foo;
 	for (m = mons; m; m = m->next)
@@ -1438,16 +1446,6 @@ pushstack(const Arg *arg) {
 void
 quit(const Arg *arg)
 {
-	size_t i;
-
-	/* kill child processes */
-	for (i = 0; i < autostart_len; i++) {
-		if (0 < autostart_pids[i]) {
-			kill(autostart_pids[i], SIGTERM);
-			waitpid(autostart_pids[i], NULL, 0);
-		}
-	}
-
 	running = 0;
 }
 
