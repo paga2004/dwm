@@ -143,6 +143,7 @@ typedef struct Pertag Pertag;
 struct Monitor {
 	char ltsymbol[16];
 	float mfact;
+	float smfact;
 	int nmaster;
 	int num;
 	int by;               /* bar geometry */
@@ -200,7 +201,6 @@ static void drawbars(void);
 static void dwindle(Monitor *);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
-static void fibonacci(Monitor *, int);
 static void focus(Client *c);
 static void focusin(XEvent *e);
 static void focusmon(const Arg *arg);
@@ -242,6 +242,7 @@ static void setfullscreen(Client *c, int fullscreen);
 static void setgaps(const Arg *arg);
 static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
+static void setsmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
 static void showgrid(const Arg *arg);
@@ -249,7 +250,6 @@ static void showhide(Client *c);
 static void sigchld(int unused);
 static void sigdwmblocks(const Arg *arg);
 static void spawn(const Arg *arg);
-static void spiral(Monitor *);
 static int stackpos(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
@@ -330,6 +330,7 @@ struct Pertag {
 	unsigned int curtag, prevtag; /* current and previous tag */
 	int nmasters[LENGTH(tags) + 1]; /* number of windows in master area */
 	float mfacts[LENGTH(tags) + 1]; /* mfacts per tag */
+	float smfacts[LENGTH(tags) + 1]; /* smfacts per tag */
 	unsigned int sellts[LENGTH(tags) + 1]; /* selected layouts */
 	const Layout *ltidxs[LENGTH(tags) + 1][2]; /* matrix of tags and layouts indexes  */
 	int showbars[LENGTH(tags) + 1]; /* display bar for the current tag */
@@ -758,6 +759,7 @@ createmon(void)
 	m = ecalloc(1, sizeof(Monitor));
 	m->tagset[0] = m->tagset[1] = 1;
 	m->mfact = mfact;
+	m->smfact = smfact;
 	m->nmaster = nmaster;
 	m->showbar = showbar;
 	m->topbar = topbar;
@@ -772,6 +774,7 @@ createmon(void)
 	for (i = 0; i <= LENGTH(tags); i++) {
 		m->pertag->nmasters[i] = m->nmaster;
 		m->pertag->mfacts[i] = m->mfact;
+		m->pertag->smfacts[i] = m->smfact;
 
 		m->pertag->ltidxs[i][0] = m->lt[0];
 		m->pertag->ltidxs[i][1] = m->lt[1];
@@ -935,8 +938,43 @@ drawbars(void)
 }
 
 void
-dwindle(Monitor *mon) {
-	fibonacci(mon, 1);
+dwindle(Monitor *m) {
+	unsigned int i, n, x, y, w, h;
+	Client *c;
+
+	for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+	if (n == 0) return;
+    
+    if(n == 1) {
+        c = nexttiled(m->clients);
+    }
+
+    if(n == 1) {
+        x = m->wx - m->gap->gappx;
+        y = m->wy - m->gap->gappx;
+        w = m->ww + m->gap->gappx; 
+        h = m->wh + m->gap->gappx;
+    } else {
+        x = m->wx;
+        y = m->wy;
+        w = m->mfact * (m->ww - m->gap->gappx);
+        h = m->wh - m->gap->gappx;
+    }
+
+    for(i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
+        if(i % 2) {
+            x += w;
+            w = m->wx + m->ww - x - m->gap->gappx;
+            if(i != n - 1)
+                h *= m->smfact;
+        } else if(i != 0) {
+            y += h;
+            h = m->wy + m->wh - y - m->gap->gappx;
+            if(i != n - 1)
+                w *= m->smfact;
+        }
+		resize(c, x + m->gap->gappx, y +  m->gap->gappx, w - 2 * c->bw -  m->gap->gappx, h - 2 * c->bw -  m->gap->gappx, 0);
+    }
 }
 
 void
@@ -967,65 +1005,6 @@ expose(XEvent *e)
 
 	if (ev->count == 0 && (m = wintomon(ev->window)))
 		drawbar(m);
-}
-
-void
-fibonacci(Monitor *mon, int s) {
-	unsigned int i, n, nx, ny, nw, nh, gap;
-	Client *c;
-
-	for(n = 0, c = nexttiled(mon->clients); c; c = nexttiled(c->next), n++);
-	if (n == 0) return;
-    else if(n == 1) gap = 0;
-    else gap = mon->gap->gappx;
-    
-	
-	nx = mon->wx;
-	ny = 0;
-	nw = mon->ww - 2*gap;
-	nh = mon->wh - 2*gap;
-	
-	for(i = 0, c = nexttiled(mon->clients); c; c = nexttiled(c->next)) {
-		if((i % 2 && nh / 2 > 2 * c->bw)
-		   || (!(i % 2) && nw / 2 > 2 * c->bw)) {
-			if(i < n - 1) {
-				if(i % 2)
-					nh /= 2;
-				else
-					nw /= 2;
-				if((i % 4) == 2 && !s)
-					nx += nw;
-				else if((i % 4) == 3 && !s)
-					ny += nh;
-			}
-			if((i % 4) == 0) {
-				if(s)
-					ny += nh;
-				else
-					ny -= nh;
-			}
-			else if((i % 4) == 1)
-				nx += nw;
-			else if((i % 4) == 2)
-				ny += nh;
-			else if((i % 4) == 3) {
-				if(s)
-					nx += nw;
-				else
-					nx -= nw;
-			}
-			if(i == 0)
-			{
-				if(n != 1)
-					nw = mon->ww * mon->mfact;
-				ny = mon->wy;
-			}
-			else if(i == 1)
-				nw = mon->ww - nw - gap;
-			i++;
-		}
-		resize(c, nx + gap, ny + gap, nw - 2 * c->bw - gap, nh - 2 * c->bw - gap, False);
-	}
 }
 
 void
@@ -1931,6 +1910,9 @@ setgaps(const Arg *arg)
 			break;
 		case GAP_RESET:
 			gap_copy(p, &default_gap);
+            /* also reset mfact and smfact because it makes sense to reset the entire layout*/
+            selmon->mfact = mfact;
+            selmon->smfact = smfact;
 			break;
 		default:
 			p->realgap += arg->i;
@@ -1969,6 +1951,21 @@ setmfact(const Arg *arg)
 	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
 	arrange(selmon);
 }
+ 
+/* arg > 1.0 will set mfact absolutely */
+void
+setsmfact(const Arg *arg) {
+	float sf;
+
+	if(!arg || !selmon->lt[selmon->sellt]->arrange)
+		return;
+	sf = arg->f < 1.0 ? arg->f + selmon->smfact : arg->f - 1.0;
+	if(sf < 0.1 || sf > 0.9)
+		return;
+	selmon->smfact = selmon->pertag->smfacts[selmon->pertag->curtag] = sf;
+	arrange(selmon);
+}
+
 
 void
 setup(void)
@@ -2181,11 +2178,6 @@ spawn(const Arg *arg)
 	}
 }
 
-void
-spiral(Monitor *mon) {
-	fibonacci(mon, 0);
-}
-
 int
 stackpos(const Arg *arg) {
 	int n, i;
@@ -2256,7 +2248,7 @@ tile(Monitor *m)
     else gap = m->gap->gappx;
     
 	if (n > m->nmaster)
-		mw = m->nmaster ? m->ww * m->mfact : 0;
+		mw = m->nmaster ? (m->ww - gap) * m->mfact : 0;
 	else
 		mw = m->ww - gap;
 	for (i = 0, my = ty = gap, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
@@ -2408,6 +2400,7 @@ toggleview(const Arg *arg)
 		/* apply settings for this view */
 		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+		selmon->smfact = selmon->pertag->smfacts[selmon->pertag->curtag];
 		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
@@ -2803,6 +2796,7 @@ view(const Arg *arg)
 
 	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+	selmon->smfact = selmon->pertag->smfacts[selmon->pertag->curtag];
 	selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 	selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 	selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];

@@ -14,7 +14,7 @@ static const char *colors[][3]      = {
         /*               fg         bg         border   */
         [SchemeNorm] = { "#586e75", "#002b36", "#073642" },
         [SchemeSel]  = { "#93a1a1", "#002b36",  "#586e75" },
-	    [SchemeUrg]  = { "#93a1a1", "#002b36",  "#dc322f" },
+        [SchemeUrg]  = { "#93a1a1", "#002b36",  "#dc322f" },
 };
 
 static const char *const autostart[] = {
@@ -37,23 +37,23 @@ static const Rule rules[] = {
      *        WM_CLASS(STRING) = instance, class
      *        WM_NAME(STRING) = title
      */
-	/* class      instance    title       tags mask     switchtotag    isfloating   monitor */
-	 { "Gimp",     NULL,       NULL,       0,            0,             1,           -1 }, 
+    /* class      instance    title       tags mask     switchtotag    isfloating   monitor */
+     { "Gimp",     NULL,       NULL,       0,            0,             1,           -1 }, 
 };
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
+static const float smfact     = 0.50; /* factor of tiled clients [0.00..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
 static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
 
 static const Layout layouts[] = {
         /* symbol     arrange function */
-        { "[\\]",       dwindle },  /* first entry is default */
-        { "><>",      NULL },    /* no layout function means floating behavior */
-        { "[M]",      monocle },
+        { "[\\]",     dwindle },  /* first entry is default */
         { "[]=",      tile },  
+        { "[M]",      monocle },
         { "###",      grid },
-        { "[@]",      spiral },
+        { "><>",      NULL },     /* no layout function means floating behavior */
         { NULL,       NULL },
 };
 
@@ -133,7 +133,7 @@ static Key keys[] = {
     { MODKEY|ShiftMask,                          XK_b,              NULL,                    {0} },
     { MODKEY,                                    XK_k,              focusmon,                {.i = -1 } },
     { MODKEY|ShiftMask,                          XK_k,              tagmon,                  {.i = -1 } },
-    { MODKEY,                                    XK_m,              setlayout,               {.v = &layouts[2]} },
+    { MODKEY,                                    XK_m,              setlayout,               {.v = &layouts[3]} },
     { MODKEY|ShiftMask,                          XK_m,              spawn,                   SHCMD("volume toggle") },
 
     { MODKEY,                                    XK_0,              showgrid,                {0} },
@@ -168,6 +168,8 @@ static Key keys[] = {
     { MODKEY|ShiftMask,                          XK_period,         NULL,                    {0} },
     { MODKEY,                                    XK_Left,           setmfact,                {.f = -0.01 } },
     { MODKEY,                                    XK_Right,          setmfact,                {.f = +0.01 } },
+    { MODKEY,                                    XK_Down,           setsmfact,               {.f = +0.01} },
+    { MODKEY,                                    XK_Up,             setsmfact,               {.f = -0.01} },
     { MODKEY,                                    XK_Page_Up,        NULL,                    {0} },
     { MODKEY|ShiftMask,                          XK_Page_Up,        NULL,                    {0} },
     { MODKEY,                                    XK_Page_Down,      NULL,                    {0} },
