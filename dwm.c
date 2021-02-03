@@ -1682,6 +1682,7 @@ resizemouse(const Arg *arg)
 				int dx = x - (horizcorner ? ocx : ocx2);
 				int dy = (int)(vertcorner ^ horizcorner ? -1 : 1) * (ratio * dx);
 				y = (vertcorner ? ocy : ocy2) + dy;
+		        XWarpPointer(dpy, None, root, 0, 0, 0, 0, x, y);
 			} else {
 				y = ev.xmotion.y;
 			}
