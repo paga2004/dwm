@@ -16,10 +16,11 @@ static const char *colors[][3]      = {
 };
 
 static const char *const autostart[] = {
-        "remaps", NULL,
-        "unclutter", NULL,
-        "dwmblocks", NULL,
         "wallpaper", NULL,
+        "remaps", NULL,
+        "dwmblocks", NULL,
+        "dunst", NULL,
+        "unclutter", NULL,
         NULL /* terminate */
 };
 
