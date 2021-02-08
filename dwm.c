@@ -1050,7 +1050,9 @@ focusmon(const Arg *arg)
 
 	if (!mons->next)
 		return;
-	if ((m = dirtomon(arg->i)) == selmon)
+    if(arg->i == 0 && (m = mons) == selmon) // focus primary monitor
+        return;
+	else if ((m = dirtomon(arg->i)) == selmon)
 		return;
 	sel = selmon->sel;
 	selmon = m;
@@ -1726,6 +1728,8 @@ void
 run(void)
 {
 	XEvent ev;
+	Arg a = { .i = 0 };
+    focusmon(&a);
 	/* main event loop */
 	XSync(dpy, False);
 	while (running && !XNextEvent(dpy, &ev))
