@@ -334,6 +334,7 @@ struct Pertag {
 	unsigned int sellts[LENGTH(tags) + 1]; /* selected layouts */
 	const Layout *ltidxs[LENGTH(tags) + 1][2]; /* matrix of tags and layouts indexes  */
 	int showbars[LENGTH(tags) + 1]; /* display bar for the current tag */
+    Gap *gaps[LENGTH(tags) + 1]; /* gaps per tag */
 };
 
 static unsigned int scratchtag = 1 << LENGTH(tags);
@@ -775,6 +776,8 @@ createmon(void)
 		m->pertag->nmasters[i] = m->nmaster;
 		m->pertag->mfacts[i] = m->mfact;
 		m->pertag->smfacts[i] = m->smfact;
+        m->pertag->gaps[i] = malloc(sizeof(Gap));
+        gap_copy(m->pertag->gaps[i], &default_gap);
 
 		m->pertag->ltidxs[i][0] = m->lt[0];
 		m->pertag->ltidxs[i][1] = m->lt[1];
@@ -1910,20 +1913,22 @@ setgaps(const Arg *arg)
 	switch(arg->i)
 	{
 		case GAP_TOGGLE:
-			p->isgap = 1 - p->isgap;
+			p->isgap = selmon->pertag->gaps[selmon->pertag->curtag]->isgap = 1 - p->isgap;
 			break;
 		case GAP_RESET:
 			gap_copy(p, &default_gap);
+			gap_copy(selmon->pertag->gaps[selmon->pertag->curtag], &default_gap);
             /* also reset mfact and smfact because it makes sense to reset the entire layout*/
-            selmon->mfact = mfact;
-            selmon->smfact = smfact;
+            selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = mfact;
+            selmon->smfact = selmon->pertag->smfacts[selmon->pertag->curtag] = smfact;
 			break;
 		default:
 			p->realgap += arg->i;
-			p->isgap = 1;
+            selmon->pertag->gaps[selmon->pertag->curtag]->realgap += arg->i;
+			p->isgap = selmon->pertag->gaps[selmon->pertag->curtag]->isgap = 1;
 	}
-	p->realgap = MAX(p->realgap, 0);
-	p->gappx = p->realgap * p->isgap;
+	p->realgap = selmon->pertag->gaps[selmon->pertag->curtag]->realgap = MAX(p->realgap, 0);
+	p->gappx = selmon->pertag->gaps[selmon->pertag->curtag]->gappx = p->realgap * p->isgap;
 	arrange(selmon);
 }
 
@@ -2405,6 +2410,7 @@ toggleview(const Arg *arg)
 		selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 		selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
 		selmon->smfact = selmon->pertag->smfacts[selmon->pertag->curtag];
+        gap_copy(selmon->gap, selmon->pertag->gaps[selmon->pertag->curtag]);
 		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
@@ -2801,6 +2807,7 @@ view(const Arg *arg)
 	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
 	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
 	selmon->smfact = selmon->pertag->smfacts[selmon->pertag->curtag];
+    gap_copy(selmon->gap, selmon->pertag->gaps[selmon->pertag->curtag]);
 	selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 	selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 	selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
