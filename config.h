@@ -38,7 +38,7 @@ static const Rule rules[] = {
      *        WM_NAME(STRING) = title
      */
     /* class      instance    title       tags mask     switchtotag    isfloating   monitor */
-     { "Gimp",     NULL,       NULL,       0,            0,             1,           -1 }, 
+     { "Gimp",     NULL,       NULL,       0,            0,             1,           -1 },
 };
 
 /* layout(s) */
@@ -50,7 +50,7 @@ static const int resizehints = 1;    /* 1 means respect size hints in tiled resi
 static const Layout layouts[] = {
         /* symbol     arrange function */
         { "[\\]",     dwindle },  /* first entry is default */
-        { "[]=",      tile },  
+        { "[]=",      tile },
         { "[M]",      monocle },
         { "###",      grid },
         { "><>",      NULL },     /* no layout function means floating behavior */
@@ -133,7 +133,7 @@ static Key keys[] = {
     { MODKEY|ShiftMask,                          XK_b,              NULL,                    {0} },
     { MODKEY,                                    XK_k,              focusmon,                {.i = -1 } },
     { MODKEY|ShiftMask,                          XK_k,              tagmon,                  {.i = -1 } },
-    { MODKEY,                                    XK_m,              setlayout,               {.v = &layouts[3]} },
+    { MODKEY,                                    XK_m,              setlayout,               {.v = &layouts[2]} },
     { MODKEY|ShiftMask,                          XK_m,              spawn,                   SHCMD("volume toggle") },
 
     { MODKEY,                                    XK_0,              showgrid,                {0} },
