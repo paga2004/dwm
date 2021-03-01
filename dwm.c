@@ -170,6 +170,7 @@ typedef struct {
 	const char *title;
 	unsigned int tags;
 	unsigned int switchtotag;
+	unsigned int switchback;
 	int isfloating;
 	int monitor;
 } Rule;
@@ -376,8 +377,9 @@ applyrules(Client *c)
 			if (m)
 				c->mon = m;
 			if (r->switchtotag) {
+				if(r->switchback)
+					c->switchtotag = selmon->tagset[selmon->seltags];
 				Arg a = { .ui = r->tags };
-				c->switchtotag = selmon->tagset[selmon->seltags];
 				view(&a);
 			}
 		}
