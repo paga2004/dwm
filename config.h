@@ -37,8 +37,8 @@ static const Rule rules[] = {
      *        WM_CLASS(STRING) = instance, class
      *        WM_NAME(STRING) = title
      */
-    /* class                 instance    title    tags mask  switchtotag   switchback   isfloating   monitor */
-   	 { "VirtualBox",         NULL,       NULL,    1 << 8,         1,           0,            0,        -1 },
+    /* class                 instance    title    tags mask   isfloating   monitor */
+   	 { "VirtualBox",         NULL,       NULL,    1 << 8,     0,           -1 },
 };
 
 /* layout(s) */
