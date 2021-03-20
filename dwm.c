@@ -64,6 +64,7 @@
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
+#define SCRATCHPADMASK          (((1 << LENGTH(scratchpads)) - 1) << LENGTH(tags))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 #define TRUNC(X,A,B)            (MAX((A), MIN((X), (B))))
 #define TTEXTW(X)               (drw_fontset_getwidth(drw, (X)))
@@ -171,6 +172,11 @@ typedef struct {
 	int isfloating;
 	int monitor;
 } Rule;
+
+typedef struct {
+	const char *name;
+	const Arg cmd;
+} Scratchpad;
 
 /* function declarations */
 static void applyrules(Client *c);
@@ -335,10 +341,8 @@ struct Pertag {
     Gap *gaps[LENGTH(tags) + 1]; /* gaps per tag */
 };
 
-static unsigned int scratchtag = 1 << LENGTH(tags);
-
 /* compile-time check if all tags fit into an unsigned int bit array. */
-struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
+struct NumTags { char limitexceeded[LENGTH(tags) + LENGTH(scratchpads) > 31 ? -1 : 1]; };
 
 /* dwm will keep pids of processes from the autostart array and kill them at quit */
 static pid_t *autostart_pids;
@@ -1265,6 +1269,7 @@ manage(Window w, XWindowAttributes *wa)
 	Client *c, *t = NULL;
 	Window trans = None;
 	XWindowChanges wc;
+	size_t i;
 
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
@@ -1294,13 +1299,14 @@ manage(Window w, XWindowAttributes *wa)
 		&& (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
 	c->bw = borderpx;
 
-	selmon->tagset[selmon->seltags] &= ~scratchtag;
-	if (!strcmp(c->name, scratchpadname)) {
-		c->mon->tagset[c->mon->seltags] |= c->tags = scratchtag;
-		c->isfloating = True;
-		c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
-		c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
-	}
+	selmon->tagset[selmon->seltags] &= ~SCRATCHPADMASK;
+	for (i = 0; i < LENGTH(scratchpads); i++)
+		if (scratchpads[i].name && !strcmp(c->name, scratchpads[i].name)) {
+			c->mon->tagset[c->mon->seltags] |= c->tags = 1 << i << LENGTH(tags);
+			c->isfloating = 1;
+			c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
+			c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
+		}
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
@@ -2135,7 +2141,7 @@ spawn(const Arg *arg)
 {
 	if (arg->v == dmenucmd)
 		dmenumon[0] = '0' + selmon->num;
-	selmon->tagset[selmon->seltags] &= ~scratchtag;
+	selmon->tagset[selmon->seltags] &= ~SCRATCHPADMASK;
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
@@ -2336,11 +2342,14 @@ void
 togglescratch(const Arg *arg)
 {
 	Client *c;
-	unsigned int found = 0;
+	const Scratchpad *s = arg->v;
+	const unsigned int tag = (unsigned int)(s - scratchpads);
 
-	for (c = selmon->clients; c && !(found = c->tags & scratchtag); c = c->next);
-	if (found) {
-		unsigned int newtagset = selmon->tagset[selmon->seltags] ^ scratchtag;
+	for (c = selmon->clients; c && !(c->tags & (1 << tag << LENGTH(tags))); c = c->next)
+		;
+
+	if (c) {
+		unsigned int newtagset = selmon->tagset[selmon->seltags] ^ c->tags;
 		if (newtagset) {
 			selmon->tagset[selmon->seltags] = newtagset;
 			focus(NULL);
@@ -2351,7 +2360,7 @@ togglescratch(const Arg *arg)
 			restack(selmon);
 		}
 	} else
-		spawn(arg);
+		spawn(&s->cmd);
 }
 
 void

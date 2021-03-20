@@ -81,14 +81,29 @@ static const Layout layouts[] = {
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 static const char *termcmd[]  = { "st", NULL };
-static const char scratchpadname[] = "scratchpad";
-static const char *scratchpadcmd[] = { "st", "-t", scratchpadname, "-g", "120x34", NULL };
+
+/*
+ * Helpers for spawning scratchpad.
+ * The title of a window has to match _exactly_ .name field.
+ */
+#define PREFIX "scratchpad: "
+#define TERMCMD(...) { .v = (const char *[]){ "st", __VA_ARGS__, NULL } }
+#define SCRATCHPAD(NAME, ...) { .name = PREFIX NAME, .cmd = TERMCMD("-t", PREFIX NAME, "-e", __VA_ARGS__) }
+
+static const Scratchpad scratchpads[] = {
+	           /* name,      cmd */
+	SCRATCHPAD("Notes",      "vim"),
+	SCRATCHPAD("Shell",      "/bin/bash"),
+	SCRATCHPAD("Python",     "python"),
+	SCRATCHPAD("Music",      "ncmpcpp"),
+};
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY,                       XK_grave,  togglescratch,  {.v = scratchpadcmd } },
+	{ MODKEY,                       XK_grave,  togglescratch,  {.v = &scratchpads[0] } },
+	{ MODKEY,                       XK_g,      togglescratch,  {.v = &scratchpads[1] } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	STACKKEYS(MODKEY,                          focus)
 	STACKKEYS(MODKEY|ShiftMask,                push)

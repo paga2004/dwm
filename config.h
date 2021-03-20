@@ -67,15 +67,26 @@ static const Layout layouts[] = {
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
-#define TERMCMD(cmd) SHCMD("$TERMINAL -e " cmd)
+#define TERMCMD(cmd) SHCMD("st -e " cmd)
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, NULL };
 static const char *termcmd[]  = { "st",  "-e", "/bin/fish", NULL };
 
-static const char scratchpadname[] = "scratchpad";
-static const char *scratchpadcmd[] = { "st", "-t", scratchpadname, "-g", "120x34", "-e", "/bin/fish", NULL };
+/*
+ * Helpers for spawning scratchpad.
+ * The title of a window has to match _exactly_ .name field.
+ */
+#define PREFIX "scratchpad: "
+#define SP(NAME, ...) { .name = PREFIX NAME, .cmd = { .v = (const char*[]){ __VA_ARGS__, NULL } } }
+#define SPTERM(NAME, CMD) { .name = PREFIX NAME, .cmd = { .v = (const char*[]){"st", "-g", "120x34", "-t", PREFIX NAME, "-e", "/bin/sh", "-c", CMD, NULL } } }
+
+static const Scratchpad scratchpads[] = {
+	           /* name,      cmd */
+	SPTERM("Shell",   "/bin/fish"),
+	SPTERM("Python",  "python"),
+};
 
 #include <X11/XF86keysym.h>
 
@@ -88,7 +99,7 @@ static Key keys[] = {
     { MODKEY,                                    XK_f,              togglefullscreen,        {0} },
     { MODKEY|ShiftMask,                          XK_f,              togglefakefullscreen,    {0} },
     { MODKEY,                                    XK_p,              spawn,                   SHCMD("passmenu --type") },
-    { MODKEY|ShiftMask,                          XK_p,              NULL,                    {0} },
+    { MODKEY|ShiftMask,                          XK_p,              togglescratch,           { .v = &scratchpads[1] } },
     { MODKEY,                                    XK_g,              NULL,                    {0} },
     { MODKEY|ShiftMask,                          XK_g,              NULL,                    {0} },
     { MODKEY,                                    XK_j,              focusmon,                {.i = +1 } },
@@ -158,7 +169,7 @@ static Key keys[] = {
     { MODKEY|ShiftMask,                          XK_Escape,         NULL,                    {0} },
     { MODKEY,                                    XK_grave,          spawn,                   SHCMD("dmenuemoji") },
     { MODKEY,                                    XK_Return,         spawn,                   {.v = termcmd } },
-    { MODKEY|ShiftMask,                          XK_Return,         togglescratch,           {.v = scratchpadcmd } },
+    { MODKEY|ShiftMask,                          XK_Return,         togglescratch,           {.v = &scratchpads[0] } },
     { MODKEY,                                    XK_space,          zoom,                    {0} },
     { MODKEY|ShiftMask,                          XK_space,          togglefloating,          {0} },
     { MODKEY,                                    XK_Tab,            view,                    {0} },
