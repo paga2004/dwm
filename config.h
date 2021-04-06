@@ -134,8 +134,9 @@ static Key keys[] = {
 
     { MODKEY,                                    XK_z,              NULL,                    {0} },
     { MODKEY|ShiftMask,                          XK_z,              NULL,                    {0} },
-    { MODKEY,                                    XK_x,              spawn,                   SHCMD("slock") },
-    { MODKEY|ShiftMask,                          XK_x,              spawn,                   SHCMD("slock systemctl suspend") },
+    { MODKEY,                                    XK_x,              spawn,                   SHCMD("slock systemctl suspend") },
+    { MODKEY|ShiftMask,                          XK_x,              spawn,                   SHCMD("slock") },
+    { MODKEY|ControlMask,                        XK_x,              spawn,                   SHCMD("systemctl hibernate") },
     { MODKEY,                                    XK_c,              NULL,                    {0} },
     { MODKEY|ShiftMask,                          XK_c,              NULL,                    {0} },
     { MODKEY,                                    XK_v,              NULL,                    {0} },
