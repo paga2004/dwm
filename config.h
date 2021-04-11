@@ -72,7 +72,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, NULL };
-static const char *termcmd[]  = { "st",  "-e", "/bin/fish", NULL };
+static const char *termcmd[]  = { "st",  "-e", "/bin/tmux", NULL };
 
 /*
  * Helpers for spawning scratchpad.
@@ -80,7 +80,7 @@ static const char *termcmd[]  = { "st",  "-e", "/bin/fish", NULL };
  */
 #define PREFIX "scratchpad: "
 #define SP(NAME, ...) { .name = PREFIX NAME, .cmd = { .v = (const char*[]){ __VA_ARGS__, NULL } } }
-#define SPTERM(NAME, CMD) { .name = PREFIX NAME, .cmd = { .v = (const char*[]){"st", "-g", "120x34", "-t", PREFIX NAME, "-e", "/bin/sh", "-c", CMD, NULL } } }
+#define SPTERM(NAME, CMD) { .name = PREFIX NAME, .cmd = { .v = (const char*[]){"st", "-g", "120x34", "-t", PREFIX NAME, "-e", "/bin/tmux", "new-session", CMD, NULL } } }
 
 static const Scratchpad scratchpads[] = {
 	           /* name,      cmd */
