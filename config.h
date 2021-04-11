@@ -207,7 +207,8 @@ static Key keys[] = {
     { MODKEY,                                    XK_F8,             spawn,                   SHCMD("dmenumount") },
     { MODKEY,                                    XK_F9,             spawn,                   SHCMD("dmenuumount") },
     { MODKEY,                                    XK_F10,            spawn,                   SHCMD("webcam") },
-    { MODKEY,                                    XK_F11,            spawn,                   SHCMD("displayselect") },
+    { MODKEY,                                    XK_F11,            spawn,                   SHCMD("displayselect auto") },
+    { MODKEY|ShiftMask,                          XK_F11,            spawn,                   SHCMD("displayselect") },
     { MODKEY,                                    XK_F12,            spawn,                   SHCMD("freeze") },
 
     { 0, XF86XK_AudioMute,                       spawn,             SHCMD("volume mute") },
